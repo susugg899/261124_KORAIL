@@ -12,8 +12,9 @@ def normalize_db_url(url):
     pg8000은 컴파일된 확장(DLL)이 없어 Windows 애플리케이션 제어 정책에 막히지 않고,
     Vercel(Linux)에서도 그대로 동작한다. pg8000은 ?sslmode= 같은 쿼리 옵션을 받지 않으므로 제거한다.
     """
+    url = (url or "").strip().lstrip("﻿")  # 복사·파이프 과정에서 붙은 공백·BOM 제거
     if not url:
-        return url
+        return None
     for prefix in ("postgres://", "postgresql://", "postgresql+psycopg2://"):
         if url.startswith(prefix):
             url = "postgresql+pg8000://" + url[len(prefix):]
@@ -24,7 +25,7 @@ def normalize_db_url(url):
 
 
 class Config:
-    SECRET_KEY = os.environ.get("SECRET_KEY")
+    SECRET_KEY = (os.environ.get("SECRET_KEY") or "").strip().lstrip("﻿") or None
     # 로컬: 상대 경로 sqlite URI(sqlite:///card.db)는 Flask-SQLAlchemy가 instance/ 폴더 기준으로 해석한다.
     #       값이 없으면 create_app()에서 instance/card.db로 지정한다.
     # 배포: Supabase Postgres 연결 문자열 (postgresql://...)
