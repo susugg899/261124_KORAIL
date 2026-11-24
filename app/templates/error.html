@@ -1,0 +1,11 @@
+{% extends "base.html" %}
+{% block title %}오류 {{ code }}{% endblock %}
+{% block body %}
+<div class="login-wrap">
+  <section class="panel">
+    <h2>오류 {{ code }}</h2>
+    <p class="sub" style="margin-top:8px">{{ message }}</p>
+    <div class="btns"><a class="btn ghost" href="{{ url_for('employees.list_') }}">직원 목록으로</a></div>
+  </section>
+</div>
+{% endblock %}

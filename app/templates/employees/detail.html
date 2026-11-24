@@ -1,0 +1,67 @@
+{% extends "base.html" %}
+{% block title %}{{ employee.name }}{% endblock %}
+{% block body %}
+<main>
+  <section class="panel form">
+    <h2>{{ employee.name }}
+      {% if employee.position %}<span class="badge">{{ employee.position.name }}</span>{% endif %}
+      {% if not employee.is_active %}<span class="badge off">삭제됨</span>{% endif %}
+    </h2>
+    <p class="sub">등록 {{ employee.created_at|dt }} · 수정 {{ employee.updated_at|dt }}</p>
+
+    <dl class="info">
+      <dt>휴대전화</dt><dd class="mono">{{ employee.mobile|phone }}</dd>
+      <dt>영문 이름</dt><dd>{{ employee.name_en or '-' }}</dd>
+      <dt>소속 부서</dt><dd>{{ employee.department.name if employee.department else '-' }}</dd>
+      <dt>직급 / 직책</dt><dd>{{ employee.position.name if employee.position else '-' }}</dd>
+      <dt>사무실 전화</dt><dd class="mono">{{ (employee.tel|phone) or '-' }}</dd>
+      <dt>이메일</dt><dd>{{ employee.email or '-' }}</dd>
+      <dt>입사일</dt><dd>{{ employee.hire_date.isoformat() if employee.hire_date else '-' }}</dd>
+    </dl>
+
+    {% if employee.is_active %}
+    <div class="btns">
+      <button type="button" class="primary" id="dlFront">앞면 PNG 저장</button>
+      <button type="button" class="ghost" id="dlBack">뒷면 PNG 저장</button>
+      <button type="button" class="ghost" id="print">인쇄 (앞·뒷면)</button>
+    </div>
+    <div class="btns" style="margin-top:8px">
+      <a class="btn ghost" href="{{ url_for('employees.edit', id=employee.id) }}">정보 수정</a>
+      <form method="post" action="{{ url_for('employees.delete', id=employee.id) }}"
+            onsubmit="return confirm('{{ employee.name }} 님을 삭제할까요? 목록에서 사라지며, 상세 화면에서 복원할 수 있습니다.');">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        <button type="submit" class="danger">삭제</button>
+      </form>
+    </div>
+    {% else %}
+    <div class="btns">
+      <form method="post" action="{{ url_for('employees.restore', id=employee.id) }}">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        <button type="submit" class="primary">직원 복원</button>
+      </form>
+    </div>
+    {% endif %}
+
+    <h3 class="section-title">발급 이력 <span class="badge" id="issueCount">{{ employee.issues|length }}</span></h3>
+    <div class="table-wrap">
+      <table class="grid">
+        <thead><tr><th>일시</th><th>면</th><th>방식</th><th>발급자</th></tr></thead>
+        <tbody id="issueRows">
+          {% for i in issues %}
+          {% set d = i.to_dict() %}
+          <tr><td class="mono">{{ d.issued_at }}</td><td>{{ d.side_label }}</td><td>{{ d.method_label }}</td><td>{{ d.issued_by }}</td></tr>
+          {% else %}
+          <tr id="issueEmpty"><td colspan="4" class="empty">아직 발급 기록이 없습니다.</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  {% with employee_id=employee.id, preview_sub='현재 회사 정보 설정이 반영된 명함입니다.' %}{% include "_preview.html" %}{% endwith %}
+</main>
+{% endblock %}
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/card.js') }}"></script>
+<script src="{{ url_for('static', filename='js/form.js') }}"></script>
+{% endblock %}

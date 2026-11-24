@@ -1,0 +1,73 @@
+{% extends "base.html" %}
+{% block title %}관리 설정{% endblock %}
+
+{% macro item_list(kind, label, items) %}
+<section class="panel">
+  <h2>{{ label }} 관리</h2>
+  <p class="sub">등록 화면의 선택 목록에 이 순서대로 나옵니다. 사용 중지한 항목은 새로 선택할 수 없습니다.</p>
+  <form class="add-form" method="post">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+    <input type="hidden" name="action" value="add">
+    <input type="hidden" name="kind" value="{{ kind }}">
+    <input name="name" maxlength="30" placeholder="새 {{ label }} 이름" required>
+    <button class="primary" type="submit">추가</button>
+  </form>
+  <table class="grid">
+    <thead><tr><th>이름</th><th>상태</th><th style="text-align:right">순서 · 상태 변경</th></tr></thead>
+    <tbody>
+      {% for it in items %}
+      <tr class="{{ '' if it.is_active else 'inactive' }}">
+        <td>{{ it.name }}</td>
+        <td>{% if it.is_active %}<span class="badge ok">사용</span>{% else %}<span class="badge off">사용 중지</span>{% endif %}</td>
+        <td>
+          <div class="row-actions">
+            {% for action, text, disabled in [('up', '▲', loop.first), ('down', '▼', loop.last)] %}
+            <form method="post">
+              <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+              <input type="hidden" name="action" value="{{ action }}">
+              <input type="hidden" name="kind" value="{{ kind }}">
+              <input type="hidden" name="id" value="{{ it.id }}">
+              <button class="ghost btn-sm" type="submit" {{ 'disabled' if disabled }} title="{{ '위로' if action == 'up' else '아래로' }}">{{ text }}</button>
+            </form>
+            {% endfor %}
+            <form method="post">
+              <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+              <input type="hidden" name="action" value="toggle">
+              <input type="hidden" name="kind" value="{{ kind }}">
+              <input type="hidden" name="id" value="{{ it.id }}">
+              <button class="{{ 'danger' if it.is_active else 'ghost' }} btn-sm" type="submit">{{ '사용 중지' if it.is_active else '다시 사용' }}</button>
+            </form>
+          </div>
+        </td>
+      </tr>
+      {% else %}
+      <tr><td colspan="3" class="empty">항목이 없습니다.</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</section>
+{% endmacro %}
+
+{% block body %}
+<main class="wide">
+  <section class="panel" style="max-width:640px">
+    <h2>회사 정보</h2>
+    <p class="sub">명함 앞·뒷면의 회사 표기와 주소, 이메일 자동 완성 도메인입니다. 저장하면 모든 명함에 바로 반영됩니다.</p>
+    <form method="post" novalidate>
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+      <input type="hidden" name="action" value="settings">
+      {% for key, label in fields %}
+      <label for="{{ key }}">{{ label }} <span class="req">*</span></label>
+      <input id="{{ key }}" name="{{ key }}" value="{{ values[key] }}" maxlength="100" class="{{ 'invalid' if errors[key] }}">
+      <div class="hint">{{ errors[key] or '' }}</div>
+      {% endfor %}
+      <div class="btns"><button class="primary" type="submit" style="flex:none">회사 정보 저장</button></div>
+    </form>
+  </section>
+
+  <div class="admin-grid" id="lists">
+    {{ item_list('dept', '부서', departments) }}
+    {{ item_list('pos', '직급', positions) }}
+  </div>
+</main>
+{% endblock %}

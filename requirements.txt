@@ -1,0 +1,14 @@
+Flask==3.0.3
+Flask-SQLAlchemy==3.1.1
+# 2.1은 컴파일된 확장(DLL)이 막힌 PC(Windows 애플리케이션 제어 정책)에서 동작하지 않는다.
+# 2.0.x는 확장을 못 불러오면 순수 Python으로 자동 전환된다.
+SQLAlchemy==2.0.36
+Flask-WTF==1.2.1
+Flask-Login==0.6.3
+python-dotenv==1.0.1
+# Supabase Postgres 드라이버 (순수 Python: DLL 차단 PC와 Vercel 모두에서 동작)
+pg8000==1.31.6
+scramp==1.5.0
+pytest==8.3.3
+# 2단계(ZIP 일괄 생성)에서 추가
+# cairosvg==2.7.1

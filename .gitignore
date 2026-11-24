@@ -1,0 +1,19 @@
+# 비밀값·개인정보 (저장소에 올리지 않는다)
+.env
+.env.*
+!.env.example
+instance/
+*.db
+*.db-journal
+*.sqlite3
+
+# Python
+.venv/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+
+# 배포 도구 로컬 설정
+.vercel/
+.claude/
+supabase/.temp/

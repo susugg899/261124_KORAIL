@@ -1,0 +1,57 @@
+{% extends "base.html" %}
+{% block title %}직원 목록{% endblock %}
+{% block body %}
+<main class="wide">
+  <section class="panel">
+    <div class="panel-head">
+      <div>
+        <h2>직원 목록</h2>
+        <p class="sub" style="margin:0">총 {{ pagination.total }}명{% if q %} · '{{ q }}' 검색 결과{% endif %}</p>
+      </div>
+      <form class="search" method="get" action="{{ url_for('employees.list_') }}">
+        <input name="q" value="{{ q }}" placeholder="이름 · 부서 · 전화번호로 검색">
+        <button class="ghost" type="submit">검색</button>
+        {% if q %}<a class="btn ghost btn-sm" style="padding:10px 12px" href="{{ url_for('employees.list_') }}">초기화</a>{% endif %}
+      </form>
+      <a class="btn primary" style="flex:none" href="{{ url_for('employees.new') }}">+ 직원 등록</a>
+    </div>
+
+    <div class="table-wrap">
+      <table class="grid nowrap">
+        <thead>
+          <tr><th>이름</th><th>영문 이름</th><th>소속 부서</th><th>직급 / 직책</th><th>휴대전화</th><th>이메일</th><th>등록일</th></tr>
+        </thead>
+        <tbody>
+          {% for e in pagination.items %}
+          <tr>
+            <td><a href="{{ url_for('employees.detail', id=e.id) }}">{{ e.name }}</a></td>
+            <td class="muted">{{ e.name_en or '' }}</td>
+            <td>{{ e.department.name if e.department else '' }}</td>
+            <td>{{ e.position.name if e.position else '' }}</td>
+            <td class="mono">{{ e.mobile|phone }}</td>
+            <td class="muted">{{ e.email or '' }}</td>
+            <td class="mono muted">{{ e.created_at|dt('%Y-%m-%d') }}</td>
+          </tr>
+          {% else %}
+          <tr><td colspan="7" class="empty">
+            {% if q %}검색 결과가 없습니다.{% else %}등록된 직원이 없습니다. <a href="{{ url_for('employees.new') }}">첫 직원을 등록</a>해 보세요.{% endif %}
+          </td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+
+    {% if pagination.pages > 1 %}
+    <nav class="pager">
+      {% if pagination.has_prev %}<a href="{{ url_for('employees.list_', q=q or None, page=pagination.prev_num) }}">‹</a>{% else %}<span class="disabled">‹</span>{% endif %}
+      {% for p in pagination.iter_pages(left_edge=1, right_edge=1, left_current=2, right_current=2) %}
+        {% if p %}
+          {% if p == pagination.page %}<span class="on">{{ p }}</span>{% else %}<a href="{{ url_for('employees.list_', q=q or None, page=p) }}">{{ p }}</a>{% endif %}
+        {% else %}<span class="disabled">…</span>{% endif %}
+      {% endfor %}
+      {% if pagination.has_next %}<a href="{{ url_for('employees.list_', q=q or None, page=pagination.next_num) }}">›</a>{% else %}<span class="disabled">›</span>{% endif %}
+    </nav>
+    {% endif %}
+  </section>
+</main>
+{% endblock %}

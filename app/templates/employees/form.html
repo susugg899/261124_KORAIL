@@ -1,0 +1,75 @@
+{% extends "base.html" %}
+{% block title %}{{ '직원 정보 수정' if employee else '직원 등록' }}{% endblock %}
+{% macro field_attrs(name) -%}
+id="{{ name }}" name="{{ name }}"{% if errors[name] %} class="invalid"{% endif %}
+{%- endmacro %}
+{% block body %}
+<main>
+  <section class="panel form">
+    <h2>{{ '직원 정보 수정' if employee else '직원 정보 입력' }}</h2>
+    <p class="sub">필수 항목만 입력해도 명함이 완성됩니다.</p>
+
+    <form method="post" id="empForm" novalidate {% if employee %}data-employee-id="{{ employee.id }}"{% endif %}>
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
+      <label for="name">이름 <span class="req">*</span></label>
+      <input {{ field_attrs('name') }} placeholder="예) 홍길동" maxlength="10" autocomplete="off" value="{{ values.name or '' }}">
+      <div class="hint" id="nameHint">{{ errors.name or '' }}</div>
+
+      <label for="mobile">휴대전화 <span class="req">*</span></label>
+      <input {{ field_attrs('mobile') }} placeholder="010-0000-0000" inputmode="numeric" autocomplete="off" value="{{ values.mobile or '' }}">
+      <div class="hint" id="mobileHint">{{ errors.mobile or '' }}</div>
+      <div class="hint dup-link" id="mobileDup">{% if dup %}<a href="{{ url_for('employees.detail', id=dup.id) }}">기존 직원 보기 ({{ dup.name }}{{ ', 삭제됨' if not dup.is_active }}) →</a>{% endif %}</div>
+
+      <details open>
+        <summary>추가 정보 (선택)</summary>
+        <label for="name_en">영문 이름</label>
+        <input {{ field_attrs('name_en') }} placeholder="예) Hong Gil-dong" maxlength="40" value="{{ values.name_en or '' }}">
+        <div class="hint" id="name_enHint">{{ errors.name_en or '' }}</div>
+        <div class="row">
+          <div>
+            <label for="department_id">소속 부서</label>
+            <select {{ field_attrs('department_id') }}>
+              <option value="">선택 안 함</option>
+              {% for d in departments %}
+              <option value="{{ d.id }}" data-label="{{ d.name }}" {{ 'selected' if values.department_id == d.id|string }}>{{ d.name }}{{ ' (사용 중지)' if not d.is_active }}</option>
+              {% endfor %}
+            </select>
+            <div class="hint">{{ errors.department_id or '' }}</div>
+          </div>
+          <div>
+            <label for="position_id">직급 / 직책</label>
+            <select {{ field_attrs('position_id') }}>
+              <option value="">선택 안 함</option>
+              {% for p in positions %}
+              <option value="{{ p.id }}" data-label="{{ p.name }}" {{ 'selected' if values.position_id == p.id|string }}>{{ p.name }}{{ ' (사용 중지)' if not p.is_active }}</option>
+              {% endfor %}
+            </select>
+            <div class="hint">{{ errors.position_id or '' }}</div>
+          </div>
+        </div>
+        <label for="tel">사무실 전화</label>
+        <input {{ field_attrs('tel') }} placeholder="예) 042-000-0000" inputmode="numeric" value="{{ values.tel or '' }}">
+        <div class="hint" id="telHint">{{ errors.tel or '' }}</div>
+        <label for="email">이메일</label>
+        <input {{ field_attrs('email') }} placeholder="예) gildong (@{{ settings.email_domain }} 자동 완성)" maxlength="100" value="{{ values.email or '' }}">
+        <div class="hint" id="emailHint">{{ errors.email or '' }}</div>
+        <label for="hire_date">입사일</label>
+        <input {{ field_attrs('hire_date') }} type="date" value="{{ values.hire_date or '' }}">
+        <div class="hint" id="hire_dateHint">{{ errors.hire_date or '' }}</div>
+      </details>
+
+      <div class="btns">
+        <button class="primary" type="submit" id="saveBtn">{{ '수정 내용 저장' if employee else '저장하고 명함 만들기' }}</button>
+        <a class="btn ghost" href="{{ url_for('employees.detail', id=employee.id) if employee else url_for('employees.list_') }}">취소</a>
+      </div>
+    </form>
+  </section>
+
+  {% with employee_id=None, preview_sub='입력과 동시에 반영됩니다.' %}{% include "_preview.html" %}{% endwith %}
+</main>
+{% endblock %}
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/card.js') }}"></script>
+<script src="{{ url_for('static', filename='js/form.js') }}"></script>
+{% endblock %}

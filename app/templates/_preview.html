@@ -1,0 +1,24 @@
+{# 명함 미리보기 패널 (등록·수정·상세 공통). employee_id가 있으면 상세 화면 모드 #}
+<section class="panel">
+  <div class="preview-head">
+    <div>
+      <h2>명함 미리보기</h2>
+      <p class="sub" style="margin:0">{{ preview_sub }}</p>
+    </div>
+    <div class="tabs">
+      <button type="button" class="on" data-view="both">앞·뒷면</button>
+      <button type="button" data-view="front">앞면</button>
+      <button type="button" data-view="back">뒷면</button>
+    </div>
+  </div>
+  <div class="stage" id="stage"
+       data-company="{{ settings.company_name }}"
+       data-company-en="{{ settings.company_name_en }}"
+       data-addr="{{ settings.address }}"
+       data-email-domain="{{ settings.email_domain }}"
+       {% if employee_id %}data-employee-id="{{ employee_id }}"{% endif %}>
+    <div class="card" id="frontWrap"></div>
+    <div class="card" id="backWrap"></div>
+  </div>
+  <p class="spec">PNG는 인쇄용 고해상도(약 1063 × 591 px, 300 dpi)로 저장됩니다.</p>
+</section>

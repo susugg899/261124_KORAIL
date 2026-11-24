@@ -1,0 +1,7 @@
+name,mobile,name_en,department,position,tel,email,hire_date
+홍길동,010-1234-5678,Hong Gil-dong,여객사업본부,대리,042-000-0000,gildong@korail.com,2026-12-01
+김철수,010-2345-6789,Kim Cheol-su,광역철도본부,사원,,cheolsu,2026-12-01
+이영희,010-3456-7890,Lee Young-hee,기술본부,주임,02-123-4567,younghee@korail.com,2026-12-01
+박민수,010-1234-5678,Park Min-su,여객사업본부,사원,,,2026-12-01
+,010-4567-8901,,안전본부,사원,,,2026-12-01
+최지우,010-5678-9012,Choi Ji-woo,없는본부,과장,,,2026-12-01

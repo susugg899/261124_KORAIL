@@ -1,0 +1,62 @@
+{% extends "base.html" %}
+{% block title %}CSV 일괄 등록{% endblock %}
+{% block body %}
+<main class="wide">
+  <section class="panel">
+    <h2>CSV 일괄 등록</h2>
+    <p class="sub">신규 입사자 명단 CSV를 올리면 행별 검증 결과를 보여 줍니다. 확인 후 정상 행만 저장합니다. (UTF-8 / CP949, 최대 500행)</p>
+    <form method="post" enctype="multipart/form-data" class="add-form" style="max-width:640px">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+      <input type="file" name="file" accept=".csv,text/csv" required>
+      <button class="primary" type="submit">올려서 검증</button>
+    </form>
+    <p class="sub" style="margin:0">
+      첫 줄(머리글): <code>name,mobile,name_en,department,position,tel,email,hire_date</code> ·
+      <a href="{{ url_for('bulk.sample') }}">샘플 CSV 내려받기</a> ·
+      부서·직급은 <a href="{{ url_for('admin.settings_page') }}">관리 설정</a>에 등록된 이름과 같아야 합니다.
+    </p>
+  </section>
+
+  {% if result %}
+  <section class="panel">
+    <div class="panel-head" style="margin-bottom:0">
+      <div>
+        <h2>검증 결과 · {{ filename }} <span class="muted" style="font-weight:400;font-size:12px">({{ encoding }})</span></h2>
+        <div class="summary-chips">
+          <span class="badge ok">정상 {{ counts.ok }}</span>
+          <span class="badge error">오류 {{ counts.error }}</span>
+          <span class="badge dup">중복 {{ counts.dup }}</span>
+        </div>
+      </div>
+      <form method="post" action="{{ url_for('bulk.confirm') }}">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        <input type="hidden" name="token" value="{{ token }}">
+        <button class="primary" type="submit" {{ 'disabled' if not counts.ok }}>정상 행만 저장 ({{ counts.ok }}건)</button>
+      </form>
+    </div>
+    <div class="table-wrap">
+      <table class="grid nowrap">
+        <thead><tr><th>줄</th><th>상태</th><th>이름</th><th>휴대전화</th><th>영문 이름</th><th>부서</th><th>직급</th><th>사무실 전화</th><th>이메일</th><th>입사일</th><th>확인 내용</th></tr></thead>
+        <tbody>
+          {% for r in result %}
+          <tr>
+            <td class="mono muted">{{ r.line }}</td>
+            <td><span class="badge {{ r.status }}">{{ {'ok': '정상', 'error': '오류', 'dup': '중복'}[r.status] }}</span></td>
+            <td>{{ r.raw.name }}</td>
+            <td class="mono">{{ r.raw.mobile }}</td>
+            <td>{{ r.raw.name_en }}</td>
+            <td>{{ r.raw.department }}</td>
+            <td>{{ r.raw.position }}</td>
+            <td class="mono">{{ r.raw.tel }}</td>
+            <td>{{ r.data.email or '' }}</td>
+            <td class="mono">{{ r.raw.hire_date }}</td>
+            <td>{% if r.messages %}<ul class="msgs">{% for m in r.messages %}<li>{{ m }}</li>{% endfor %}</ul>{% endif %}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </section>
+  {% endif %}
+</main>
+{% endblock %}

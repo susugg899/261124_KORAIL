@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="csrf-token" content="{{ csrf_token() }}">
+<title>{% block title %}{% endblock %} · 신규 직원 명함 자동 제작</title>
+<link rel="stylesheet" href="{{ url_for('static', filename='css/app.css') }}">
+</head>
+<body>
+
+<header>
+  <div class="mark">
+    <svg width="24" height="24" viewBox="0 0 24 24" fill="none"><path d="M3 15h18M3 19h18M7 15v4M12 15v4M17 15v4" stroke="#fff" stroke-width="1.8" stroke-linecap="round"/><path d="M5 11c2-5 12-5 14 0" stroke="#7FD3F5" stroke-width="2" stroke-linecap="round"/></svg>
+  </div>
+  <div>
+    <h1>신규 직원 명함 자동 제작</h1>
+    <p>이름과 전화번호를 입력하면 명함이 바로 만들어집니다 · 규격 90 × 50 mm</p>
+  </div>
+  {% if current_user.is_authenticated %}
+  {% set ep = request.endpoint or '' %}
+  <nav>
+    <a href="{{ url_for('employees.list_') }}" class="{{ 'on' if ep in ('employees.list_', 'employees.detail', 'employees.edit') }}">직원 목록</a>
+    <a href="{{ url_for('employees.new') }}" class="{{ 'on' if ep == 'employees.new' }}">직원 등록</a>
+    <a href="{{ url_for('bulk.upload') }}" class="{{ 'on' if ep.startswith('bulk.') }}">CSV 일괄 등록</a>
+    <a href="{{ url_for('admin.settings_page') }}" class="{{ 'on' if ep.startswith('admin.') }}">관리 설정</a>
+    <span class="user">{{ current_user.username }}</span>
+    <a href="{{ url_for('auth.logout') }}">로그아웃</a>
+  </nav>
+  {% endif %}
+</header>
+
+{% with messages = get_flashed_messages(with_categories=true) %}
+{% if messages %}
+<div class="flashes">
+  {% for category, message in messages %}
+  <div class="flash {{ category }}">{{ message }}</div>
+  {% endfor %}
+</div>
+{% endif %}
+{% endwith %}
+
+{% block body %}{% endblock %}
+
+<div class="toast" id="toast"></div>
+{% block scripts %}{% endblock %}
+</body>
+</html>
